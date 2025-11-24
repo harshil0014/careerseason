@@ -20,6 +20,25 @@
         <li>Total outreach: {{ $totals['outreach_count'] }}</li>
     </ul>
 
+    @if($bestWeek)
+        <h3 style="margin-top:16px;">Highlights</h3>
+        <ul>
+            <li>
+                <strong>Best week so far:</strong>
+                Week {{ $bestWeek->week_number }} – {{ $bestWeek->score }}/100
+                ({{ ucfirst(str_replace('_', ' ', $bestWeek->verdict)) }})
+            </li>
+
+            @if($worstWeek && $worstWeek->id !== $bestWeek->id)
+                <li>
+                    <strong>Toughest week:</strong>
+                    Week {{ $worstWeek->week_number }} – {{ $worstWeek->score }}/100
+                    ({{ ucfirst(str_replace('_', ' ', $worstWeek->verdict)) }})
+                </li>
+            @endif
+        </ul>
+    @endif
+
     <h2>Weeks</h2>
     @if ($checkIns->isEmpty())
         <p>No weeks logged yet.</p>

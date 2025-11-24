@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Season;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SeasonController extends Controller
 {
@@ -43,6 +44,7 @@ class SeasonController extends Controller
             'current_week'          => 1,
             'target_hours_per_week' => $data['target_hours_per_week'],
             'priority_tracks'       => $data['priority_tracks'],
+            'public_token'          => (string) Str::uuid(),
         ]);
 
         return redirect()->route('season.current');
@@ -74,6 +76,36 @@ class SeasonController extends Controller
             'outreach_count'  => $checkIns->sum('outreach_count'),
         ];
 
-        return view('season.report', compact('season', 'checkIns', 'totals'));
+        // Best and worst weeks by score (only if you have check-ins)
+        $bestWeek = $checkIns->filter(fn ($c) => $c->score !== null)->sortByDesc('score')->first();
+        $worstWeek = $checkIns->filter(fn ($c) => $c->score !== null)->sortBy('score')->first();
+
+        return view('season.report', compact('season', 'checkIns', 'totals', 'bestWeek', 'worstWeek'));
+    }
+
+    // Public report accessible via token
+    public function publicReport(string $token)
+    {
+        // Find Season by public token + load check-ins
+        $season = Season::where('public_token', $token)
+            ->with('checkIns')
+            ->firstOrFail();
+
+        $checkIns = $season->checkIns()->orderBy('week_number')->get();
+
+        $totals = [
+            'hours' => $checkIns->sum(function ($c) {
+                return $c->hours_dsa + $c->hours_projects + $c->hours_career;
+            }),
+            'problems_solved' => $checkIns->sum('problems_solved'),
+            'commits'         => $checkIns->sum('commits'),
+            'outreach_count'  => $checkIns->sum('outreach_count'),
+        ];
+
+        // Best and worst weeks by score (only if you have check-ins)
+        $bestWeek = $checkIns->filter(fn ($c) => $c->score !== null)->sortByDesc('score')->first();
+        $worstWeek = $checkIns->filter(fn ($c) => $c->score !== null)->sortBy('score')->first();
+
+        return view('season.public', compact('season', 'checkIns', 'totals', 'bestWeek', 'worstWeek'));
     }
 }
