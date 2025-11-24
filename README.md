@@ -1,6 +1,6 @@
 # CareerSeason
 
-**CareerSeason** is a 6-week execution OS for non-IIT CS/IT students aiming for SDE internships.
+**CareerSeason** is a 6-week execution OS for CS/IT students aiming for SDE internships.
 
 Instead of giving you more content and roadmaps, CareerSeason forces 6 weeks of focused execution:
 - Track your weekly hours (DSA / projects / career)
