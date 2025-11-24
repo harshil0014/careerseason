@@ -100,12 +100,61 @@
         Current week: <strong>{{ $season->current_week }}</strong>
     </p>
 
+    @if(!empty($season->public_token))
+        @php
+            $shareUrl = route('season.public', $season->public_token);
+        @endphp
+
+        <div style="margin: 8px 0 16px 0;">
+            <strong>Shareable Season link:</strong><br>
+
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:4px;">
+                <input
+                    type="text"
+                    id="share-season-url"
+                    value="{{ $shareUrl }}"
+                    readonly
+                    style="flex:1;min-width:260px;padding:6px 8px;border-radius:8px;border:1px solid #d1d5db;font-size:13px;"
+                >
+                <button
+                    type="button"
+                    onclick="copySeasonUrl()"
+                    style="padding:6px 12px;border-radius:999px;border:none;background:#4f46e5;color:white;font-size:13px;font-weight:600;cursor:pointer;"
+                >
+                    Copy link
+                </button>
+                <a href="{{ $shareUrl }}" target="_blank" style="font-size:12px;color:#4f46e5;text-decoration:none;">
+                    Open
+                </a>
+            </div>
+
+            <div id="share-season-feedback" style="font-size:11px;color:#6b7280;margin-top:4px;"></div>
+        </div>
+    @endif
+
     <p>
         Priorities:
         @foreach ($season->priority_tracks as $track)
             <span class="pill">{{ $track }}</span>
         @endforeach
     </p>
+
+    @if($nudge)
+        <div style="
+            background: #fff8e1;
+            border-left: 6px solid #ffca28;
+            padding: 12px 16px;
+            margin: 20px 0;
+            border-radius: 4px;
+        ">
+            <strong>Heads up:</strong><br>
+            Week {{ $nudge['week'] }} was a light week —
+            you logged {{ $nudge['hours'] }}h out of {{ $nudge['target'] }}h
+            ({{ $nudge['ratioPercent'] }}%).
+            <br>
+            Consider either lowering your weekly promise OR planning 2 small sessions this week.
+        </div>
+    @endif
 
     <hr>
 
@@ -153,7 +202,7 @@
                     @if ($ci)
                         <a href="{{ route('checkin.show', $w) }}">View week</a>
                     @elseif ($isCurrent)
-                        <a href="{{ route('checkin.create') }}">Do this week’s check-in →</a>
+                        <a href="{{ route('checkin.create') }}">Do this week's check-in →</a>
                     @else
                         <span>—</span>
                     @endif
@@ -172,5 +221,29 @@
         </ul>
     </div>
 </div>
+
+<script>
+    function copySeasonUrl() {
+        var input = document.getElementById('share-season-url');
+        if (!input) return;
+
+        input.select();
+        input.setSelectionRange(0, 99999); // mobile friendly
+
+        var feedback = document.getElementById('share-season-feedback');
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(input.value).then(function () {
+                if (feedback) feedback.textContent = 'Link copied to clipboard.';
+            }).catch(function () {
+                document.execCommand('copy');
+                if (feedback) feedback.textContent = 'Link copied (fallback).';
+            });
+        } else {
+            document.execCommand('copy');
+            if (feedback) feedback.textContent = 'Link copied to clipboard.';
+        }
+    }
+</script>
 </body>
 </html>

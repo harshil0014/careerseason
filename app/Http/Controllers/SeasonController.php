@@ -55,9 +55,34 @@ class SeasonController extends Controller
     {
         $season = Season::latest()->with('checkIns')->firstOrFail();
 
+        $checkIns = $season->checkIns()->orderBy('week_number')->get();
+
+        // Smart nudge based on last logged week
+        $nudge = null;
+
+        if ($checkIns->isNotEmpty() && $season->target_hours_per_week > 0) {
+            $last = $checkIns->last();
+
+            $lastHours = ($last->hours_dsa ?? 0)
+                + ($last->hours_projects ?? 0)
+                + ($last->hours_career ?? 0);
+
+            $ratio = $lastHours / $season->target_hours_per_week;
+
+            if ($ratio < 0.5) {
+                $nudge = [
+                    'week'         => $last->week_number,
+                    'hours'        => $lastHours,
+                    'target'       => $season->target_hours_per_week,
+                    'ratioPercent' => round($ratio * 100),
+                ];
+            }
+        }
+
         return view('season.dashboard', [
             'season'   => $season,
-            'checkIns' => $season->checkIns()->orderBy('week_number')->get(),
+            'checkIns' => $checkIns,
+            'nudge'    => $nudge,
         ]);
     }
 
