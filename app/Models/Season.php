@@ -15,6 +15,7 @@ class Season extends Model
         'current_week',
         'target_hours_per_week',
         'priority_tracks',
+        'public_token',
     ];
 
     protected $casts = [

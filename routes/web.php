@@ -23,3 +23,6 @@ Route::get('/season/week/{week}', [CheckInController::class, 'show'])->name('che
 
 // Simple Season Report
 Route::get('/season/report', [SeasonController::class, 'report'])->name('season.report');
+
+// Public Season Report via token
+Route::get('/s/{token}', [SeasonController::class, 'publicReport'])->name('season.public');
