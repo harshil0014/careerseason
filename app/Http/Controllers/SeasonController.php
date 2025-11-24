@@ -7,15 +7,17 @@ use Illuminate\Http\Request;
 
 class SeasonController extends Controller
 {
-    // Home: if no season, go to start page; else to dashboard
+    // Home: if no season, show landing page; else to dashboard
     public function index()
     {
         $season = Season::latest()->first();
 
         if (! $season) {
-            return redirect()->route('season.create');
+            // No season yet → show landing page
+            return view('landing');
         }
 
+        // Season exists → go to dashboard
         return redirect()->route('season.current');
     }
 
