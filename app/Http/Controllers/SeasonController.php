@@ -11,14 +11,16 @@ class SeasonController extends Controller
     // Home: if no season, show landing page; else to dashboard
     public function index()
     {
-        $season = Season::latest()->first();
+        $season = Season::where('user_id', auth()->id())
+            ->latest()
+            ->first();
 
         if (! $season) {
-            // No season yet → show landing page
+            // No season yet for this user → show landing page
             return view('landing');
         }
 
-        // Season exists → go to dashboard
+        // Season exists for this user → go to dashboard
         return redirect()->route('season.current');
     }
 
@@ -39,6 +41,7 @@ class SeasonController extends Controller
 
         // For v1 we always create a new Season; later we can add "archived" etc.
         Season::create([
+            'user_id'               => auth()->id(),   // 👈 added line
             'track'                 => 'sde_internship',
             'weeks'                 => 6,
             'current_week'          => 1,
@@ -53,7 +56,10 @@ class SeasonController extends Controller
     // Main dashboard for the latest Season
     public function showCurrent()
     {
-        $season = Season::latest()->with('checkIns')->firstOrFail();
+        $season = Season::where('user_id', auth()->id())
+            ->with('checkIns')
+            ->latest()
+            ->firstOrFail();
 
         $checkIns = $season->checkIns()->orderBy('week_number')->get();
 
@@ -89,7 +95,11 @@ class SeasonController extends Controller
     // Simple Season report
     public function report()
     {
-        $season = Season::latest()->with('checkIns')->firstOrFail();
+        $season = Season::where('user_id', auth()->id())
+            ->latest()
+            ->with('checkIns')
+            ->firstOrFail();
+
         $checkIns = $season->checkIns()->orderBy('week_number')->get();
 
         $totals = [

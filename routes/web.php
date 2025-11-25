@@ -1,28 +1,55 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SeasonController;
 use App\Http\Controllers\CheckInController;
+use Illuminate\Support\Facades\Route;
 
-// Home -> if no season, show start page; else go to dashboard
-Route::get('/', [SeasonController::class, 'index'])->name('home');
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
-// Start a new Season (only one active for now)
-Route::get('/season/start', [SeasonController::class, 'create'])->name('season.create');
-Route::post('/season', [SeasonController::class, 'store'])->name('season.store');
+// Public welcome page (for guests, before login)
+Route::get('/', function () {
+    return view('welcome');
+});
 
-// View current Season dashboard
-Route::get('/season/current', [SeasonController::class, 'showCurrent'])->name('season.current');
+// Everything below needs login
+Route::middleware(['auth', 'verified'])->group(function () {
+    // This is where Breeze sends users after login/register
+    Route::get('/dashboard', [SeasonController::class, 'index'])
+        ->name('dashboard');
 
-// Weekly check-in
-Route::get('/season/current/checkin', [CheckInController::class, 'create'])->name('checkin.create');
-Route::post('/season/current/checkin', [CheckInController::class, 'store'])->name('checkin.store');
+    // ===== CareerSeason routes =====
 
-// View a specific week's verdict
-Route::get('/season/week/{week}', [CheckInController::class, 'show'])->name('checkin.show');
+    // Season flow
+    Route::get('/season/start', [SeasonController::class, 'create'])
+        ->name('season.create');
 
-// Simple Season Report
-Route::get('/season/report', [SeasonController::class, 'report'])->name('season.report');
+    Route::post('/season', [SeasonController::class, 'store'])
+        ->name('season.store');
 
-// Public Season Report via token
-Route::get('/s/{token}', [SeasonController::class, 'publicReport'])->name('season.public');
+    Route::get('/season/current', [SeasonController::class, 'showCurrent'])
+        ->name('season.current');
+
+    Route::get('/season/report', [SeasonController::class, 'report'])
+        ->name('season.report');
+
+    // Weekly check-ins
+    Route::get('/season/current/checkin', [CheckInController::class, 'create'])
+        ->name('checkin.create');
+
+    Route::post('/season/current/checkin', [CheckInController::class, 'store'])
+        ->name('checkin.store');
+
+    Route::get('/season/week/{week}', [CheckInController::class, 'show'])
+        ->name('checkin.show');
+});
+
+// Public Season report – shareable without login
+Route::get('/s/{token}', [SeasonController::class, 'publicReport'])
+    ->name('season.public');
+
+// Breeze auth routes (login, register, etc.)
+require __DIR__.'/auth.php';

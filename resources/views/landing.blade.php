@@ -94,12 +94,22 @@
     </style>
 </head>
 <body>
+    <form method="POST" action="{{ route('logout') }}"
+          style="position:absolute; top:20px; right:20px;">
+        @csrf
+        <button type="submit"
+                style="background:#f3f4f6; border-radius:999px; padding:6px 14px;
+                       border:1px solid #ddd; cursor:pointer;">
+            Log out
+        </button>
+    </form>
+
 <div class="wrapper">
     <div class="card">
         <div class="pill">For non-IIT CS/IT students</div>
         <h1>CareerSeason</h1>
         <p class="tagline">
-            A 6-week execution OS for SDE internships. No more “I’ll start from Monday” copium –
+            A 6-week execution OS for SDE internships. No more "I'll start from Monday" copium –
             just hours, problems, commits, outreach and a Season report at the end.
         </p>
 
@@ -128,7 +138,7 @@
         </div>
 
         <div class="footer-note">
-            Built by Harshil as an “industry-grade” startup v0.1 on Laravel 12.
+            Built by Harshil as an "industry-grade" startup v0.1 on Laravel 12.
         </div>
     </div>
 </div>

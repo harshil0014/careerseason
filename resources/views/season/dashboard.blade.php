@@ -90,6 +90,16 @@
     </style>
 </head>
 <body>
+<form method="POST" action="{{ route('logout') }}"
+      style="position:absolute; top:20px; right:20px;">
+    @csrf
+    <button type="submit"
+            style="background:#f3f4f6; border-radius:999px; padding:6px 14px;
+                   border:1px solid #ddd; cursor:pointer;">
+        Log out
+    </button>
+</form>
+
 <div class="container">
     <h1>Career Season – Dashboard</h1>
 

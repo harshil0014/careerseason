@@ -11,7 +11,9 @@ class CheckInController extends Controller
     // Show form for current week's check-in
     public function create()
     {
-        $season = Season::latest()->firstOrFail();
+        $season = Season::where('user_id', auth()->id())
+            ->latest()
+            ->firstOrFail();
 
         // If already checked in for this week, show verdict instead
         $existing = $season->checkIns()
@@ -31,7 +33,9 @@ class CheckInController extends Controller
     // Handle submission of weekly check-in
     public function store(Request $request)
     {
-        $season = Season::latest()->firstOrFail();
+        $season = Season::where('user_id', auth()->id())
+            ->latest()
+            ->firstOrFail();
         $week   = $season->current_week;
 
         $data = $request->validate([
@@ -71,7 +75,9 @@ class CheckInController extends Controller
     // Show verdict for a given week
     public function show(int $week)
     {
-        $season = Season::latest()->firstOrFail();
+        $season = Season::where('user_id', auth()->id())
+            ->latest()
+            ->firstOrFail();
 
         $checkIn = $season->checkIns()
             ->where('week_number', $week)

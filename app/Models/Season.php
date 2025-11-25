@@ -10,6 +10,7 @@ class Season extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'track',
         'weeks',
         'current_week',
@@ -25,5 +26,10 @@ class Season extends Model
     public function checkIns()
     {
         return $this->hasMany(CheckIn::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
