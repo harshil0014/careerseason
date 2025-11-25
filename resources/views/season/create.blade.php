@@ -21,6 +21,25 @@
     <form method="POST" action="{{ route('season.store') }}">
         @csrf
 
+        <div style="margin-bottom: 1rem;">
+            <label for="name" style="display:block; font-weight:600; margin-bottom:4px;">
+                Season name (optional)
+            </label>
+            <input
+                type="text"
+                id="name"
+                name="name"
+                value="{{ old('name') }}"
+                placeholder="e.g. Winter SDE Season, Jan–Feb 2026"
+                style="width:100%; max-width:320px; padding:6px 8px; border-radius:6px; border:1px solid #d1d5db;"
+            >
+            @error('name')
+                <div style="color:#b91c1c; font-size:0.8rem; margin-top:4px;">
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+
         <div>
             <label>
                 Target hours per week:

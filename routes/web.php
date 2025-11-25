@@ -45,6 +45,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/season/week/{week}', [CheckInController::class, 'show'])
         ->name('checkin.show');
+
+    // Your Seasons - view all seasons
+    Route::get('/seasons', [SeasonController::class, 'indexAll'])
+        ->name('seasons.index');
+
+    // View specific season
+    Route::get('/seasons/{season}', [SeasonController::class, 'showSeason'])
+        ->name('seasons.show');
+
+    // Report for a specific season
+    Route::get('/seasons/{season}/report', [SeasonController::class, 'reportForSeason'])
+        ->name('seasons.report');
 });
 
 // Public Season report – shareable without login

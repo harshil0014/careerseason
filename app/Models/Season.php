@@ -11,6 +11,7 @@ class Season extends Model
 
     protected $fillable = [
         'user_id',
+        'name',
         'track',
         'weeks',
         'current_week',

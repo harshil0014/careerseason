@@ -106,9 +106,15 @@
 <div class="container">
     <div class="card">
         <div class="pill">Internal Season Report</div>
-        <h1>Career Season Report – SDE Internship Track</h1>
+        <h1>
+            @if($season->name)
+                {{ $season->name }} – Season Report
+            @else
+                Career Season Report – SDE Internship Track
+            @endif
+        </h1>
         <p class="subtitle">
-            Internal view with totals, highlights and week-by-week scores. Use this when you’re reviewing your own execution.
+            Internal view with totals, highlights and week-by-week scores. Use this when you're reviewing your own execution.
         </p>
 
         <div class="meta-grid">

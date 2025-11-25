@@ -93,7 +93,16 @@
 <div class="container">
     <div class="card">
         <div class="pill">CareerSeason – Public Season Report</div>
-        <h1>6-Week Season Summary</h1>
+        <h1>
+            @if($season->name)
+                {{ $season->name }}
+                <span style="font-size:0.85rem; font-weight:400; color:#6b7280;">
+                    · 6-week execution report
+                </span>
+            @else
+                Career Season – SDE Internship Track
+            @endif
+        </h1>
         <p class="subtitle">
             Read-only report for an SDE internship preparation Season. Share this link with mentors or friends.
         </p>

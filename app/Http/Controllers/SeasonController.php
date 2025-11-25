@@ -34,6 +34,7 @@ class SeasonController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'name'                  => 'nullable|string|max:100',
             'target_hours_per_week' => 'required|integer|min:1|max:80',
             'priority_tracks'       => 'required|array|min:1|max:3',
             'priority_tracks.*'     => 'string|in:dsa,projects,github_portfolio,core_cs,networking,freelance',
@@ -41,7 +42,8 @@ class SeasonController extends Controller
 
         // For v1 we always create a new Season; later we can add "archived" etc.
         Season::create([
-            'user_id'               => auth()->id(),   // 👈 added line
+            'user_id'               => auth()->id(),
+            'name'                  => $data['name'] ?? null,
             'track'                 => 'sde_internship',
             'weeks'                 => 6,
             'current_week'          => 1,
@@ -64,6 +66,47 @@ class SeasonController extends Controller
         $checkIns = $season->checkIns()->orderBy('week_number')->get();
 
         // Smart nudge based on last logged week
+        $nudge = null;
+
+        if ($checkIns->isNotEmpty() && $season->target_hours_per_week > 0) {
+            $last = $checkIns->last();
+
+            $lastHours = ($last->hours_dsa ?? 0)
+                + ($last->hours_projects ?? 0)
+                + ($last->hours_career ?? 0);
+
+            $ratio = $lastHours / $season->target_hours_per_week;
+
+            if ($ratio < 0.5) {
+                $nudge = [
+                    'week'         => $last->week_number,
+                    'hours'        => $lastHours,
+                    'target'       => $season->target_hours_per_week,
+                    'ratioPercent' => round($ratio * 100),
+                ];
+            }
+        }
+
+        return view('season.dashboard', [
+            'season'   => $season,
+            'checkIns' => $checkIns,
+            'nudge'    => $nudge,
+        ]);
+    }
+
+    // Dashboard for a specific Season (opened from /seasons list)
+    public function showSeason(Season $season)
+    {
+        // Security: only owner can view
+        if ($season->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $season->load('checkIns');
+
+        $checkIns = $season->checkIns()->orderBy('week_number')->get();
+
+        // same nudge logic as showCurrent()
         $nudge = null;
 
         if ($checkIns->isNotEmpty() && $season->target_hours_per_week > 0) {
@@ -116,6 +159,51 @@ class SeasonController extends Controller
         $worstWeek = $checkIns->filter(fn ($c) => $c->score !== null)->sortBy('score')->first();
 
         return view('season.report', compact('season', 'checkIns', 'totals', 'bestWeek', 'worstWeek'));
+    }
+
+    // Season report for a specific Season (from /seasons list)
+    public function reportForSeason(Season $season)
+    {
+        // Security: make sure this Season belongs to the logged-in user
+        if ($season->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // Eager load check-ins
+        $season->load('checkIns');
+
+        $checkIns = $season->checkIns()->orderBy('week_number')->get();
+
+        $totals = [
+            'hours' => $checkIns->sum(function ($c) {
+                return $c->hours_dsa + $c->hours_projects + $c->hours_career;
+            }),
+            'problems_solved' => $checkIns->sum('problems_solved'),
+            'commits'         => $checkIns->sum('commits'),
+            'outreach_count'  => $checkIns->sum('outreach_count'),
+        ];
+
+        $bestWeek = $checkIns->filter(fn ($c) => $c->score !== null)
+            ->sortByDesc('score')
+            ->first();
+
+        $worstWeek = $checkIns->filter(fn ($c) => $c->score !== null)
+            ->sortBy('score')
+            ->first();
+
+        return view('season.report', compact('season', 'checkIns', 'totals', 'bestWeek', 'worstWeek'));
+    }
+
+    // List all Seasons for the current user
+    public function indexAll()
+    {
+        $seasons = Season::where('user_id', auth()->id())
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('season.index', [
+            'seasons' => $seasons,
+        ]);
     }
 
     // Public report accessible via token

@@ -101,7 +101,16 @@
 </form>
 
 <div class="container">
-    <h1>Career Season – Dashboard</h1>
+    <h1>
+        @if($season->name)
+            {{ $season->name }}
+            <span style="font-size:0.8rem; font-weight:400; color:#6b7280;">
+                &middot; Career Season
+            </span>
+        @else
+            Career Season – Dashboard
+        @endif
+    </h1>
 
     <p>
         Track: <strong>SDE Internship</strong><br>
@@ -228,6 +237,7 @@
         <ul>
             <li><a href="{{ route('checkin.create') }}">Go to current week check-in</a></li>
             <li><a href="{{ route('season.report') }}">View Season report (so far)</a></li>
+            <li><a href="{{ route('seasons.index') }}">View all Seasons</a></li>
         </ul>
     </div>
 </div>
