@@ -87,10 +87,36 @@ class SeasonController extends Controller
             }
         }
 
+        // Coach v1: copium streak (2+ bad weeks in a row)
+        $copiumBanner = null;
+
+        if ($checkIns->isNotEmpty()) {
+            $streak = 0;
+            $lastWeekWithCheckIn = null;
+
+            foreach ($checkIns as $ci) {
+                if ($ci->verdict === 'copium') {
+                    $streak++;
+                    $lastWeekWithCheckIn = $ci->week_number;
+                } else {
+                    $streak = 0;
+                }
+            }
+
+            if ($streak >= 2 && $lastWeekWithCheckIn !== null) {
+                $copiumBanner = [
+                    'streak'     => $streak,
+                    'startWeek'  => $lastWeekWithCheckIn - $streak + 1,
+                    'endWeek'    => $lastWeekWithCheckIn,
+                ];
+            }
+        }
+
         return view('season.dashboard', [
-            'season'   => $season,
-            'checkIns' => $checkIns,
-            'nudge'    => $nudge,
+            'season'       => $season,
+            'checkIns'     => $checkIns,
+            'nudge'        => $nudge,
+            'copiumBanner' => $copiumBanner, // 👈 pass to view
         ]);
     }
 
@@ -106,7 +132,7 @@ class SeasonController extends Controller
 
         $checkIns = $season->checkIns()->orderBy('week_number')->get();
 
-        // same nudge logic as showCurrent()
+        // Smart nudge based on last logged week
         $nudge = null;
 
         if ($checkIns->isNotEmpty() && $season->target_hours_per_week > 0) {
@@ -128,10 +154,36 @@ class SeasonController extends Controller
             }
         }
 
+        // Coach v1: copium streak (2+ bad weeks in a row)
+        $copiumBanner = null;
+
+        if ($checkIns->isNotEmpty()) {
+            $streak = 0;
+            $lastWeekWithCheckIn = null;
+
+            foreach ($checkIns as $ci) {
+                if ($ci->verdict === 'copium') {
+                    $streak++;
+                    $lastWeekWithCheckIn = $ci->week_number;
+                } else {
+                    $streak = 0;
+                }
+            }
+
+            if ($streak >= 2 && $lastWeekWithCheckIn !== null) {
+                $copiumBanner = [
+                    'streak'     => $streak,
+                    'startWeek'  => $lastWeekWithCheckIn - $streak + 1,
+                    'endWeek'    => $lastWeekWithCheckIn,
+                ];
+            }
+        }
+
         return view('season.dashboard', [
-            'season'   => $season,
-            'checkIns' => $checkIns,
-            'nudge'    => $nudge,
+            'season'       => $season,
+            'checkIns'     => $checkIns,
+            'nudge'        => $nudge,
+            'copiumBanner' => $copiumBanner,
         ]);
     }
 
